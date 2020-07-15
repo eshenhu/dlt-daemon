@@ -16,6 +16,10 @@ if(WITH_SYSTEMD OR WITH_SYSTEMD_WATCHDOG OR WITH_SYSTEMD_JOURNAL)
   add_definitions( -DSD_EXPORT_SYMBOLS )
 endif()
 
+if(WITH_DLT_FILTER)
+  add_definitions( -DWITH_DLT_FILTER )
+endif()
+
 add_executable(gtest_dlt_common gtest_dlt_common.cpp)
 target_link_libraries(gtest_dlt_common ${DLT_LIBRARIES})
 add_test(NAME gtest_dlt_common
@@ -26,6 +30,12 @@ add_executable(gtest_dlt_user gtest_dlt_user.cpp)
 target_link_libraries(gtest_dlt_user ${DLT_LIBRARIES})
 add_test(NAME gtest_dlt_user
     COMMAND gtest_dlt_user
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(gtest_dlt_filter gtest_dlt_filter.cpp ../src/lib/dlt_util.c ../src/lib/dlt_filter.c ../src/lib/dlt_user.c)
+target_link_libraries(gtest_dlt_filter ${DLT_LIBRARIES})
+add_test(NAME gtest_dlt_filter
+    COMMAND gtest_dlt_filter
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(gtest_dlt_daemon_common gtest_dlt_daemon_common.cpp ../src/daemon/dlt_daemon_common.c)

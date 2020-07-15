@@ -1054,6 +1054,9 @@ DltReturnValue dlt_register_app(const char *apid, const char *description)
     if ((ret == DLT_RETURN_OK) && (dlt_user.dlt_log_handle != -1))
         ret = dlt_user_log_resend_buffer();
 
+#ifdef WITH_DLT_FILTER
+    dlt_flt_init(dlt_user.dlt_flt);
+#endif
     return ret;
 }
 
@@ -4745,3 +4748,13 @@ DltReturnValue dlt_user_log_out_error_handling(void *ptr1, size_t len1, void *pt
 
     return ret;
 }
+
+#ifdef WITH_DLT_FILTER
+#include "dlt_util.h"
+
+DltFltItem** dlt_log_get_filter()
+{
+    return dlt_user.dlt_flt;
+}
+#endif
+

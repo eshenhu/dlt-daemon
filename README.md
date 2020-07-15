@@ -64,6 +64,7 @@ WITH\_CHECK\_CONFIG\_FILE         | OFF            | Set to ON to create a confi
 CMAKE\_INSTALL\_PREFIX            | /usr/local
 CMAKE\_BUILD\_TYPE                | RelWithDebInfo
 WITH\_UDP\_CONNECTION             | ON             | Set to ON to enable dlt UDP multicast SUPPORT
+WITH\_DLT\_FILTER                 | OFF            | Set to ON to enable filter support
 
 #### Command Line Tool Options
 

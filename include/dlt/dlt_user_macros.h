@@ -314,6 +314,50 @@
     } while (0)
 #endif
 
+#ifdef WITH_DLT_FILTER
+/**
+ * Send log message with variable list of messages (intended for verbose mode)
+ * @param CONTEXT object containing information about one special logging context
+ * @param LOGLEVEL the log level of the log message
+ * @param ... variable list of arguments
+ * @note To avoid the MISRA warning "The comma operator has been used outside a for statement"
+ *       use a semicolon instead of a comma to separate the __VA_ARGS__.
+ *       Example: 
+ *       DLT_FLT_LOG(DLT_FLT_I(0, 1234), hContext, DLT_LOG_INFO, DLT_STRING("Hello world"); DLT_INT(123))
+ *       DLT_FLT2_LOG(DLT_FLT_C(1, 'x'), DLT_FLT_I(2, 1234), hContext, DLT_LOG_INFO, DLT_STRING("Hello world"); DLT_INT(123))
+ */
+#ifdef _MSC_VER
+/* DLT_LOG is not supported by MS Visual C++ */
+/* use function interface instead            */
+#else
+#   define DLT_FLT_LOG(FLT0, CONTEXT, LOGLEVEL, ...) \
+    do { \
+        if (!FLT0) break; \
+        DltContextData log_local; \
+        int dlt_local; \
+        dlt_local = dlt_user_log_write_start(&CONTEXT, &log_local, LOGLEVEL); \
+        if (dlt_local == DLT_RETURN_TRUE) \
+        { \
+            __VA_ARGS__; \
+            (void)dlt_user_log_write_finish(&log_local); \
+        } \
+    } while (0)
+
+#   define DLT_FLT2_LOG(FLT0, FLT1, CONTEXT, LOGLEVEL, ...) \
+    do { \
+        if (!FLT0 || !FLT1) break; \
+        DltContextData log_local; \
+        int dlt_local; \
+        dlt_local = dlt_user_log_write_start(&CONTEXT, &log_local, LOGLEVEL); \
+        if (dlt_local == DLT_RETURN_TRUE) \
+        { \
+            __VA_ARGS__; \
+            (void)dlt_user_log_write_finish(&log_local); \
+        } \
+    } while (0)
+#endif
+#endif
+
 /**
  * Add string parameter to the log messsage.
  * @param TEXT ASCII string

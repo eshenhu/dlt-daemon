@@ -27,6 +27,11 @@ if(WITH_DLT_SHM_ENABLE)
     set(dlt_LIB_SRCS ${dlt_LIB_SRCS} ${PROJECT_SOURCE_DIR}/src/shared/dlt_shm.c)
 endif()
 
+if(WITH_DLT_FILTER)
+    set(dlt_LIB_SRCS ${dlt_LIB_SRCS} dlt_filter.c dlt_util.c)
+endif()
+
+
 add_library(dlt ${dlt_LIB_SRCS})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

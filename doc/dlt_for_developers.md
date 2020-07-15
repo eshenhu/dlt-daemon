@@ -779,3 +779,20 @@ context changed. The usage is similar to DLT\_REGISTER\_INJECTION\_CALLBACK.
 ```
 DLT_REGISTER_LOG_LEVEL_CHANGED_CALLBACK(CONTEXT, CALLBACK)
 ```
+
+## Log with filter functionality
+
+In the application, multipule filter rules can be defined regardless of "CONTEXT", which means
+you can enable the taking-effect rules across the different "CONTEXT". It will be useful when 
+the LOG_LEVEL is not fine grained enough.
+
+Now, it support 'INT' 'CHAR' 'STR'(on-going) compare rules, but it will be easy to do extend.
+
+```
+uint32_t FLT_C1 = DLT_FLT_REG_CHAR("TEST:CHR");   //Register one rule.
+DLT_FLT_ATTACH_CHAR(FLT_C1, 'a');                 //Attach specified type. (here is CHAR comparison)
+
+DLT_FLT_LOG(DLT_FLT_C(FLT_C1, 'a'), context, DLT_LOG_INFO, DLT_STRING("DLT Filter Example: SHOULD be print"));
+DLT_FLT2_LOG(DLT_FLT_C(FLT_C1, 'b'), DLT_FLT_C(FLT_C1, 'c'), context, DLT_LOG_INFO, DLT_STRING("DLT Filter Example: SHOULD NOT be print"));
+
+```

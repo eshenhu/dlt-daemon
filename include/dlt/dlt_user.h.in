@@ -95,6 +95,10 @@
 #   include "dlt_user_macros.h"
 #   include "dlt_shm.h"
 
+#ifdef WITH_DLT_FILTER
+#   include "dlt_filter.h"
+#endif
+
 #   ifdef __cplusplus
 extern "C" {
 #   endif
@@ -217,6 +221,9 @@ typedef struct
 
     uint32_t dlt_ll_ts_num_entries;            /**< Number of used contexts */
 
+#ifdef WITH_DLT_FILTER
+    DltFltItem *dlt_flt[DLT_FLT_SIZE];
+#endif
     int8_t overflow;                           /**< Overflow marker, set to 1 on overflow, 0 otherwise */
     uint32_t overflow_counter;                 /**< Counts the number of lost messages */
 
