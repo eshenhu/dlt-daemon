@@ -16,7 +16,8 @@ typedef enum {
     DLT_FLT_SUP_NONE,
     DLT_FLT_SUP_INT,  /* 0, 1234, */
     DLT_FLT_SUP_CHAR, /* 'r', 'w' */
-    DLT_FLT_SUP_STR   /* "guard_002" , "rules_002" */
+    DLT_FLT_SUP_STR,   /* "guard_002" , "rules_002" */
+    DLT_FLT_SUP_BITMASK
 } DltFltSupEnum;
 
 typedef enum {
@@ -26,6 +27,7 @@ typedef enum {
     DLT_FLT_SUP_FUNC_CHAR_EQ,
     DLT_FLT_SUP_FUNC_STR_EQ,
     DLT_FLT_SUP_FUNC_STR_REG,
+    DLT_FLT_SUP_FUNC_BIT_EQ,
 } DltFltSupFuncEnum;
 
 //typedef bool (*isFLTMatch)(struct DltFltFuncBase *base, void *);
@@ -69,9 +71,15 @@ int32_t dlt_flt_reg_char(DltFltItem *const hdr[], const char *uuid);
 #define DLT_FLT_ATTACH_CHAR(IDX, CHR) dlt_flt_attach_char(dlt_log_get_filter(), IDX, CHR)
 bool dlt_flt_attach_char(DltFltItem *hdr[], int32_t idx, char v);
 
+// BITMASK
+#define DLT_FLT_REG_BITMASK(NAME) dlt_flt_reg_bitmask(dlt_log_get_filter(), NAME)
+int32_t dlt_flt_reg_bitmask(DltFltItem *const hdr[], const char *uuid);
+// Attach
+#define DLT_FLT_ATTACH_BITMASK(IDX, BIT) dlt_flt_attach_bitmask(dlt_log_get_filter(), IDX, BIT)
+bool dlt_flt_attach_bitmask(DltFltItem *hdr[], int32_t idx, uint64_t bit);
+
 // ToDo:
 int32_t dlt_flt_reg_str(DltFltItem *const hdr[], const char *uuid);
-
 
 void dlt_flt_detach_all(DltFltItem *hdr[], int32_t idx);
 
@@ -85,4 +93,7 @@ bool dlt_flt_is_allow_char(DltFltItem *hdr[], uint32_t idx, char chr);
 
 #define DLT_FLT_S(IDX, VAR) dlt_flt_is_allow_str(dlt_log_get_filter(), IDX, VAR)
 bool dlt_flt_is_allow_str(DltFltItem *hdr[], uint32_t idx, char *str);
+
+#define DLT_FLT_B(IDX, VAR) dlt_flt_is_allow_bitmask(dlt_log_get_filter(), IDX, VAR)
+bool dlt_flt_is_allow_bitmask(DltFltItem *hdr[], uint32_t idx, uint64_t bitmask);
 #endif

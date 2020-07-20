@@ -60,6 +60,12 @@ typedef struct
 typedef struct
 {
     DltFltFuncBase base;
+    uint64_t bitmask;
+} DltFltFuncBitmaskEQ;
+
+typedef struct
+{
+    DltFltFuncBase base;
     char *cmp;
 } DltFltFuncStrEQ;
 
@@ -70,6 +76,7 @@ bool isFLTIntBtw(struct DltFltFuncBase *base, void *d);
 bool isFLTCharCmp(struct DltFltFuncBase *base, void *d);
 //static bool isFLTStrCmp(struct DltFltFuncBase *base, void *d);
 //static bool isFLTStrReg(DltFltFuncBase *base, void *d);
+bool isFLTBitmaskCmp(struct DltFltFuncBase *base, void *d);
 
 static void dlt_flt_init_a_slot(DltFltItem *cur);
 
@@ -106,10 +113,22 @@ bool isFLTCharCmp(struct DltFltFuncBase *base, void *d) {
     return s->chr == *(char*)d;
 }
 
+bool isFLTBitmaskCmp(struct DltFltFuncBase *base, void *d) {
+    DltFltFuncBitmaskEQ *s = (DltFltFuncBitmaskEQ *)base;
+    return s->bitmask & *(uint64_t*)d;
+}
+
 DltFltFuncCharEQ *dlt_flt_new_struct_char() {
     DltFltFuncCharEQ *ptr = malloc(sizeof(DltFltFuncCharEQ));
     ptr->base.type = DLT_FLT_SUP_FUNC_CHAR_EQ;
     ptr->base.func = isFLTCharCmp;
+    return ptr;
+}
+
+DltFltFuncBitmaskEQ *dlt_flt_new_struct_bitmask() {
+    DltFltFuncBitmaskEQ *ptr = malloc(sizeof(DltFltFuncBitmaskEQ));
+    ptr->base.type = DLT_FLT_SUP_FUNC_BIT_EQ;
+    ptr->base.func = isFLTBitmaskCmp;
     return ptr;
 }
 
@@ -215,6 +234,10 @@ int32_t dlt_flt_reg_str(DltFltItem *const hdr[], const char *uuid) {
     return dlt_flt_reg_dep(hdr, uuid, DLT_FLT_SUP_STR);
 }
 
+int32_t dlt_flt_reg_bitmask(DltFltItem *const hdr[], const char *uuid) {
+    return dlt_flt_reg_dep(hdr, uuid, DLT_FLT_SUP_BITMASK);
+}
+
 bool dlt_flt_attach_int_eq(DltFltItem *hdr[], int32_t idx, int v) {
     DltFltItem *slot = hdr[idx];
 
@@ -299,6 +322,32 @@ bool dlt_flt_attach_char(DltFltItem *hdr[], int32_t idx, char v) {
     return true;    
 }
 
+bool dlt_flt_attach_bitmask(DltFltItem *hdr[], int32_t idx, uint64_t v) {
+    DltFltItem *slot = hdr[idx];
+
+    if (slot->type != DLT_FLT_SUP_BITMASK) {
+        dlt_log(LOG_ERR, "No expected type as DLT_FLT_SUP_BITMASK!\n");
+        return false;
+    }
+
+    DltFltFuncBase **base = dlt_flt_find_func_slot(slot->func_vldt);
+    if (!base) {
+        dlt_log(LOG_ERR, "Failed to find a free func slot!\n");
+        return false;
+    }
+
+    DltFltFuncBitmaskEQ *ptr = dlt_flt_new_struct_bitmask();
+    if (!ptr) {
+        dlt_log(LOG_ERR, "Failed to malloc for func slot!\n");
+        return false;
+    }
+
+    ptr->bitmask = v;
+    *base = (DltFltFuncBase *)ptr;
+
+    return true;    
+}
+
 void dlt_flt_detach_all(DltFltItem *hdr[], int32_t idx) {
     DltFltItem *slot = hdr[idx];
     dlt_flt_reset_func_slot(slot->func_vldt);
@@ -334,4 +383,8 @@ bool dlt_flt_is_allow_char(DltFltItem *hdr[], uint32_t idx, char chr) {
 
 bool dlt_flt_is_allow_str(DltFltItem *hdr[], uint32_t idx, char *str) {
     return dlt_flt_is_allow_dep(hdr, DLT_FLT_SUP_STR, idx, str);
+}
+
+bool dlt_flt_is_allow_bitmask(DltFltItem *hdr[], uint32_t idx, uint64_t bit) {
+    return dlt_flt_is_allow_dep(hdr, DLT_FLT_SUP_BITMASK, idx, &bit);
 }

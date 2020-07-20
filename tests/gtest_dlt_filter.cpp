@@ -126,6 +126,21 @@ TEST(t_dlt_reg, normal) {
 
         EXPECT_FALSE(dlt_flt_attach_int_eq(p, 1, 'x'));
         EXPECT_EQ(DLT_FLT_FUNC_SIZE, get_num_of_active_rules(p[1]));
+
+        // add another.
+        EXPECT_EQ(2, dlt_flt_reg_bitmask(p, "TEST:3"));
+
+        // try to add a int
+        EXPECT_FALSE(dlt_flt_attach_int_eq(p, 2, 6));
+
+        // 'a' 'b' 'c' 'd' ...
+        for (int i = 0; i < DLT_FLT_FUNC_SIZE; ++i) {
+            EXPECT_TRUE(dlt_flt_attach_bitmask(p, 2, 0x01 << i));
+            EXPECT_EQ(i + 1, get_num_of_active_rules(p[2]));
+        }
+
+        EXPECT_FALSE(dlt_flt_attach_int_eq(p, 1, 0x10));
+        EXPECT_EQ(DLT_FLT_FUNC_SIZE, get_num_of_active_rules(p[2]));
     }
     dlt_flt_termination(p);
 }
@@ -252,6 +267,29 @@ TEST(t_dlt_reg, validate_rules_char) {
         EXPECT_TRUE(dlt_flt_is_allow_char(p, 0, 'a'));
         EXPECT_TRUE(dlt_flt_is_allow_char(p, 0, 'b'));
         EXPECT_FALSE(dlt_flt_is_allow_char(p, 0, 'c'));
+    }
+    dlt_flt_termination(p);
+}
+
+/* alloc more rules*/
+TEST(t_dlt_reg, validate_rules_bitmask) {
+    DltFltItem **p = dlt_flt_alloc();
+    EXPECT_NE(nullptr, p);
+
+    dlt_flt_init(p);
+    {
+        dlt_flt_reset_reg_num();
+        EXPECT_EQ(0, dlt_flt_reg_bitmask(p, "TEST:BITMASK"));
+
+        EXPECT_FALSE(dlt_flt_is_allow_int(p, 0, 1234));
+        EXPECT_TRUE(dlt_flt_is_allow_bitmask(p, 0, 0x01));
+
+        EXPECT_TRUE(dlt_flt_attach_bitmask(p, 0, 0x01));
+
+        EXPECT_TRUE(dlt_flt_is_allow_bitmask(p, 0, 0x01));
+        EXPECT_FALSE(dlt_flt_is_allow_bitmask(p, 0, 0x02));
+        EXPECT_TRUE(dlt_flt_is_allow_bitmask(p, 0, 0x03));
+        EXPECT_EQ(1, get_num_of_active_rules(p[0]));
     }
     dlt_flt_termination(p);
 }
